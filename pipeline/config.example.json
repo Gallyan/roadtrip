@@ -1,0 +1,25 @@
+{
+  "route": {
+    "source": "directions",
+    "directions": {
+      "origin": "46.778, 6.641",
+      "destination": "46.670, 6.330",
+      "waypoints": [],
+      "mode": "driving"
+    },
+    "gpx_file": "./track.gpx"
+  },
+  "step_m": 10,
+  "chunk_size": 9000,
+  "segment_size": null,
+  "route_name": "demo",
+  "image": {
+    "size": "640x640",
+    "pitch": -0.76,
+    "fov": 90,
+    "scale": 1
+  },
+  "precheck_metadata": true,
+  "output_dir": "../Site/medias/images",
+  "concurrency": 4
+}
