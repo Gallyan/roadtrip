@@ -60,12 +60,14 @@ Le dépôt contient déjà :
   supportés.
 - Files d'attente : driver `database` par défaut (Redis optionnel et recommandé
   pour le throttling fin).
-- Temps réel page de statut : polling simple suffit en MVP ; **Laravel Reverb**
-  optionnel.
+- **Livewire** (3 ou 4) pour l'UI réactive : pages **statut** et **stats** en
+  `wire:poll` (progression, quota du mois) sans endpoints ni JS de polling
+  dédiés. Laravel Reverb optionnel si tu veux du vrai push plus tard.
 - **ffmpeg** requis sur l'hôte pour l'export MP4 (appelé via le `Process`
   Laravel).
-- Front : Blade + un peu de JS. Carte via **Leaflet/MapLibre** ou Google Maps JS.
-  Réutiliser le lecteur canvas de `Site/` pour l'aperçu.
+- Carte : réutilise le composant **`livewire-map`** (Leaflet + Alpine, fonds de
+  carte gratuits **sans clé API**) — voir §11. Le lecteur d'aperçu reste le
+  canvas de `Site/` (JS pur).
 
 ## 5. Périmètre fonctionnel (flux utilisateur)
 
@@ -217,6 +219,16 @@ table `image_usages` ; n'invente pas d'appel à une API de facturation Google.
 
 ## 11. Réutilisation de l'existant
 
+- **Composant carte** : réutilise le package **`livewire-map`** (Leaflet +
+  Alpine) pour l'éditeur d'itinéraire. Il fournit l'affichage du tracé
+  (`:routes`), l'import GPX affiché en `:geojson`, et les événements
+  `map-click {lat,lng}` (ajouter un waypoint), `marker-click`, `map-moved`,
+  `map-ready`. Fonds de carte gratuits, **aucune clé API navigateur**. Inclus-le
+  via un *path/VCS repository* dans le `composer.json` (pas encore sur Packagist).
+  **Fonctions manquantes pour l'édition** (markers déplaçables + `dragend`, clic
+  sur le tracé) : voir `docs/livewire-map-gaps.md` — à implémenter dans
+  `livewire-map`, sinon contourner via l'escape hatch `map-ready` (accès à
+  l'objet Leaflet).
 - **Lecteur canvas** : réutilise `Site/scripts/{sequencer,application,audioPlayer}.js`
   et `Site/vendor/glfx.js` pour l'aperçu live et la base de l'export. Le
   `Sequencer` lit `segments.json` + `configuration.json` + les JPG ; sers ces
@@ -251,7 +263,6 @@ table `image_usages` ; n'invente pas d'appel à une API de facturation Google.
 ```php
 'google' => [
     'maps_key' => env('GOOGLE_MAPS_API_KEY'),
-    'maps_browser_key' => env('GOOGLE_MAPS_BROWSER_KEY'),
     'monthly_budget' => env('GOOGLE_MONTHLY_BUDGET', 9000),
     'free_monthly' => env('GOOGLE_FREE_MONTHLY', 10000),
     'cost_per_image' => env('GOOGLE_COST_PER_IMAGE', 0.007),
@@ -260,8 +271,8 @@ table `image_usages` ; n'invente pas d'appel à une API de facturation Google.
 ```
 - `GOOGLE_MAPS_API_KEY` : clé **serveur** (Street View Static + Directions),
   jamais exposée au navigateur, jamais loggée.
-- `GOOGLE_MAPS_BROWSER_KEY` : clé d'**affichage carte** (restreinte par
-  referrer) — optionnelle si tu utilises Leaflet/MapLibre.
+- **Aucune clé navigateur nécessaire** : l'éditeur utilise les fonds de carte
+  gratuits de `livewire-map`. Google n'est appelé que **côté serveur**.
 - Fournis un `.env.example` documenté.
 
 ## 14. Sécurité
